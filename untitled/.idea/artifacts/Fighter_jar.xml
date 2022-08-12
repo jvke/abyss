@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Fighter:jar">
+    <output-path>$USER_HOME$/Documents/Abyss</output-path>
+    <root id="archive" name="Fighter.jar">
+      <element id="module-output" name="Fighter" />
+    </root>
+  </artifact>
+</component>

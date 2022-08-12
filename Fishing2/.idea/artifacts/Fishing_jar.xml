@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Fishing:jar">
+    <output-path>$USER_HOME$/Documents/Kraken</output-path>
+    <root id="archive" name="Fishing.jar">
+      <element id="module-output" name="Fishing" />
+    </root>
+  </artifact>
+</component>

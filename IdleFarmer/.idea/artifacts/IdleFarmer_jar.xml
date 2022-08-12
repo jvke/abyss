@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="IdleFarmer:jar">
+    <output-path>$USER_HOME$/Documents/Kraken</output-path>
+    <root id="archive" name="IdleFarmer.jar">
+      <element id="module-output" name="IdleFarmer" />
+    </root>
+  </artifact>
+</component>

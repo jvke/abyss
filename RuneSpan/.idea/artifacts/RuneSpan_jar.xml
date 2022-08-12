@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="RuneSpan:jar">
+    <output-path>$USER_HOME$/Documents/Kraken</output-path>
+    <root id="archive" name="RuneSpan.jar">
+      <element id="module-output" name="RuneSpan" />
+    </root>
+  </artifact>
+</component>

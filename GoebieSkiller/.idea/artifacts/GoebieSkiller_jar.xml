@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="GoebieSkiller:jar">
+    <output-path>$USER_HOME$/Documents/Abyss</output-path>
+    <root id="archive" name="GoebieSkiller.jar">
+      <element id="module-output" name="GoebieSkiller" />
+    </root>
+  </artifact>
+</component>

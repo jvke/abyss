@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ArchGlacor:jar">
+    <output-path>$USER_HOME$/Documents/Kraken</output-path>
+    <root id="archive" name="ArchGlacor.jar">
+      <element id="module-output" name="ArchGlacor" />
+    </root>
+  </artifact>
+</component>

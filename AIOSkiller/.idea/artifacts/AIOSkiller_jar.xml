@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="AIOSkiller:jar">
+    <output-path>$USER_HOME$/Documents/Abyss</output-path>
+    <root id="archive" name="AIOSkiller.jar">
+      <element id="module-output" name="AIOSkiller" />
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="CrocHunter:jar">
+    <output-path>$USER_HOME$/Documents/Kraken</output-path>
+    <root id="archive" name="CrocHunter.jar">
+      <element id="module-output" name="CrocHunter" />
+    </root>
+  </artifact>
+</component>
