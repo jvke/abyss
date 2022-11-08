@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="CroesusLeech:jar">
+    <output-path>$USER_HOME$/Documents/Abyss</output-path>
+    <root id="archive" name="Smithing.jar">
+      <element id="archive" name="Smithing.jar">
+        <element id="module-output" name="Smithing" />
+      </element>
+    </root>
+  </artifact>
+</component>

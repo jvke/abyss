@@ -76,7 +76,7 @@ public class RimmingtonConstruction extends Plugin {
     
     public States getState() {
         if (shouldChop()) {
-            return States.CHOP;    
+            return States.CHOP;
         }
 
         if (shouldPlank()) {
@@ -166,9 +166,9 @@ public class RimmingtonConstruction extends Plugin {
     public void onPaint() {
         ImGui.label("RimmingtonConstruction!");
     }
-    
+
     private void chop() {
-        SceneObject oak = SceneObjects.closest(o -> Array.contains(OAKS, o.getId()));
+        SceneObject oak = SceneObjects.closest(o -> Array.contains(OAKS, o.getId()) && !o.hidden());
 
         if (oak != null && !Players.self().isAnimationPlaying()) {
             oak.interact("Chop down");
@@ -214,7 +214,7 @@ public class RimmingtonConstruction extends Plugin {
         SceneObject entrance = SceneObjects.closest(o -> o.getId() == ENTRANCE);
 
         if (entrance != null) {
-            entrance.interact("Enter building mode"); 
+            entrance.interact("Enter building mode");
         }
     }
 

@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Fishing" />
+        <module name="Fishing2" />
       </profile>
     </annotationProcessing>
   </component>

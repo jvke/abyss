@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="AutoCycle:jar">
-    <output-path>$USER_HOME$/Documents/Kraken</output-path>
+    <output-path>$USER_HOME$/Documents/Abyss</output-path>
     <root id="archive" name="AutoCycle.jar">
       <element id="module-output" name="AutoCycle" />
     </root>

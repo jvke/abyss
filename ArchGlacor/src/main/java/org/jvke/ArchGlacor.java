@@ -1,5 +1,6 @@
 package org.jvke;
 
+import abyss.plugin.api.variables.VariableManager;
 import kraken.plugin.api.*;
 
 import static kraken.plugin.api.Rng.i32;
@@ -18,40 +19,7 @@ public class ArchGlacor extends Plugin {
     boolean killFinished = false;
     int instanceAttemptCount = 0;
 
-    public enum PrayerType {
-        PROTECT_MAGIC(37, 11, 64),
-        PROTECT_RANGED(40, 12, 128),
-        PROTECT_MELEE(43, 13, 256),
-        RETRIBUTION(46, 14, 512),
-        SMITE(52, 16, 2048),
-        REDEMPTION(49, 15, 1024),
-        MYSTIC_MIGHT(45, 6, 8192),
-        RAPID_RESTORE(19, 7, 8),
-        PROTECT_FROM_SUMMONING(35, 10, 65536),
-        RAPID_HEAL(22, 8, 16),
-        PROTECT_ITEM(25, 9, 32),
-        OVERCHARGE(45, 5, 32768),
-        EAGLE_EYE(44, 4, 4096),
-        OVERPOWERING_FORCE(44, 3, 16384),
-        INCREDIBLE_REFLEXES(34, 2, 4),
-        ULTIMATE_STRENGTH(31, 1, 2),
-        STEEL_SKIN(28, 0, 1);
-
-        private int level;
-        private int index;
-        private int convar;
-        PrayerType(int level, int index, int convar) {
-            this.level = level;
-            this.index = index;
-            this.convar = convar;
-        }
-
-        public int getRequiredLevel() {
-            return level;
-        }
-        public int getIndex() { return index; }
-        public int getConvar() { return convar; }
-    }
+    Thread prayerThread;
 
     private enum States {
         LOOT,
@@ -62,111 +30,6 @@ public class ArchGlacor extends Plugin {
         TELEPORT_TO_GLACOR,
         ENTER_INSTANCE,
         IDLE
-    }
-
-    public static int getPrayerPoints() {
-        WidgetGroup group = Widgets.getGroupById(1430);
-        if (group != null) {
-            Widget container1 = group.getWidget(0);
-            if (container1 != null) {
-                Widget container2 = container1.getChild(1);
-                if (container2 != null) {
-                    Widget container3 = container2.getChild(1);
-                    if (container3 != null) {
-                        Widget container4 = container3.getChild(1);
-                        if (container4 != null) {
-                            Widget text = container4.getChild(8);
-                            if (text != null) {
-                                String textString = text.getText();
-                                if (textString != null) {
-                                    String[] split = textString.split("/");
-                                    if (split.length > 0) {
-                                        return Integer.parseInt(split[0]);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return 0;
-    }
-
-    public static int getMaxPrayerPoints() {
-        WidgetGroup group = Widgets.getGroupById(1430);
-        if (group != null) {
-            Widget container1 = group.getWidget(0);
-            if (container1 != null) {
-                Widget container2 = container1.getChild(1);
-                if (container2 != null) {
-                    Widget container3 = container2.getChild(1);
-                    if (container3 != null) {
-                        Widget container4 = container3.getChild(1);
-                        if (container4 != null) {
-                            Widget text = container4.getChild(8);
-                            if (text != null) {
-                                String textString = text.getText();
-                                if (textString != null) {
-                                    String[] split = textString.split("/");
-                                    if (split.length > 1) {
-                                        return Integer.parseInt(split[1]);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return 0;
-    }
-
-    public static void togglePrayer(PrayerType prayerType) {
-        WidgetGroup prayerMenu = Widgets.getGroupById(1458);
-        if (prayerMenu != null) {
-            Widget container1 = prayerMenu.getWidget(0);
-            if (container1 != null) {
-                Widget container2 = container1.getChild(1);
-                if (container2 != null) {
-                    Widget container3 = container2.getChild(0);
-                    if (container3 != null) {
-                        Widget container4 = container3.getChild(2);
-                        if (container4 != null) {
-                            int currentPrayerLevel = Client.getStatById(Client.PRAYER).getCurrent();
-                            if (currentPrayerLevel >= prayerType.getRequiredLevel()) {
-                                Widget prayer = container4.getChild(prayerType.getIndex());
-                                prayer.interact(prayerType.getIndex());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public boolean isPrayerGreaterThanPercent(int percent) {
-        double decimal = (double) percent / 100D;
-        int max = (int) (getMaxPrayerPoints() * decimal);
-        int current = getPrayerPoints();
-
-        if (current <= max) {
-            return false;
-        }
-
-        return true;
-    }
-
-    //checks the convar for the current active prayer.
-    public static boolean isPrayerActive(PrayerType prayerType) {
-        ConVar prayer = Client.getConVarById(3272);
-        if (prayer.getValueInt() == prayerType.getConvar()) {
-            return true;
-        }
-
-        return false;
     }
 
     private boolean isInGlacorArea() {
@@ -189,13 +52,13 @@ public class ArchGlacor extends Plugin {
     private boolean shouldTeleportToBank() {
         Npc n = Npcs.closest(npc -> npc.getId() == ARCH_GLACOR);
 
-        return (killFinished && isInGlacorArea()) || (isInGlacorArea() && n == null && !isPrayerGreaterThanPercent(70));
+        return (killFinished && isInGlacorArea()) || (isInGlacorArea() && n == null && !Prayer.isPrayerGreaterThanPercent(70));
     }
 
     private boolean shouldPrayAtAltar() {
         SceneObject altar = SceneObjects.closest(obj -> obj.getId() == ALTAR_OF_WAR);
 
-        return altar != null && !isPrayerGreaterThanPercent(90);
+        return altar != null && !Prayer.isPrayerGreaterThanPercent(90);
     }
 
     private boolean shouldBank() {
@@ -214,6 +77,29 @@ public class ArchGlacor extends Plugin {
         SceneObject portal = SceneObjects.closest(obj -> obj.getId() == AQUEDUCT_PORTAL);
 
         return !isInGlacorArea() && portal != null && !portal.hidden();
+    }
+
+    private void startPrayerThread() {
+        prayerThread = new Thread(() -> {
+            while (true) {
+                if (Prayer.shouldToggleCorrectPrayer()) {
+                    Prayer.toggleCorrectPrayer();
+                }
+
+                sleep(1000, 2000);
+            }
+        });
+
+        prayerThread.start();
+
+    }
+
+    private void sleep(int min, int max) {
+        try {
+            Thread.sleep(i32(min, max));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     //    LOOT,
@@ -375,8 +261,6 @@ public class ArchGlacor extends Plugin {
             Npc n = Npcs.closest(npc -> npc.getId() == ARCH_GLACOR);
             if (n != null && n.interact("Attack")) {
                 Debug.log("Clicked Fight on glacor");
-            } else if (n == null) {
-                Input.key(0x33);
             }
         }
     }

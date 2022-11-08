@@ -116,6 +116,10 @@ public class Archeology extends Plugin {
 
         if (cart != null) {
             cart.interact(USE_MATERIAL_CART ? "Deposit materials" : "Deposit all");
+        } else {
+            if (!Players.self().isMoving()) {
+                Move.to(new Vector3i(3779, 3217, 0));
+            }
         }
     }
 
@@ -148,6 +152,10 @@ public class Archeology extends Plugin {
 
         State s = getState();
         Debug.log(s.toString());
+
+        if (Inventory.count(i -> i.getName().contains("tome")) > 0 && USE_BANK) {
+            s = State.IDLE;
+        }
 
         switch (s) {
             case DROP:

@@ -25,7 +25,7 @@ public class CroesusLeech extends Plugin {
     private int GREEN_BOMB = 7564;
     private int STICKY_FUNGUS = 121740;
     private int FAIRY_RING = 121739;
-    private int STUNNED = -1;
+    private int STUNNED = 23612; // player animation
 
     // valid tiles
     private int STORAGE_SPOT = 121467;
@@ -35,6 +35,7 @@ public class CroesusLeech extends Plugin {
     enum State {
         MOVE,
         UNSTUCK,
+        UNSTUN,
         SIP_RESTORE,
         MID,
         CORE,
@@ -45,6 +46,10 @@ public class CroesusLeech extends Plugin {
     public State getState() {
         if (shouldUnstuck()) {
             return State.UNSTUCK;
+        }
+
+        if (shouldUnstun()) {
+            return State.UNSTUN;
         }
 
         if (shouldMid()) {
@@ -112,20 +117,27 @@ public class CroesusLeech extends Plugin {
         return false;
     }
 
+    private boolean shouldUnstun() {
+        Player s = Players.self();
+
+        return s.getAnimationId() == STUNNED;
+    }
+
     private boolean shouldSipRestore() {
         return false;
     }
 
     private boolean shouldMid() {
-        SceneObject mid = SceneObjects.closest(obj -> obj.getId() == MID);
+        Npc mid = Npcs.closest(obj -> obj.getId() == MID);
 
         return mid != null;
     }
 
     private boolean shouldCore() {
-        SceneObject core = SceneObjects.closest(obj -> obj.getId() == FISH_CORE || obj.getId() == MINE_CORE || obj.getId() == HUNT_CORE || obj.getId() == WC_CORE);
+        SceneObject ocore = SceneObjects.closest(obj -> obj.getId() == FISH_CORE || obj.getId() == MINE_CORE || obj.getId() == HUNT_CORE || obj.getId() == WC_CORE);
+        Npc ncore = Npcs.closest(obj -> obj.getId() == FISH_CORE || obj.getId() == MINE_CORE || obj.getId() == HUNT_CORE || obj.getId() == WC_CORE);
 
-        return core != null;
+        return ocore != null || ncore != null;
     }
 
     private boolean shouldReset() {
@@ -133,7 +145,9 @@ public class CroesusLeech extends Plugin {
     }
 
     private void move() {
-        Vector3i[] sortedTiles = sortTilesByNearest(validTiles);
+//        Vector3i[] sortedTiles = sortTilesByNearest(validTiles);
+        Vector3i[] sortedTiles = validTiles;
+
         Effect[] effects = Effects.all(eff -> eff.getId() == BLUE_BOMB || eff.getId() == RED_BOMB || eff.getId() == YELLOW_BOMB || eff.getId() == GREEN_BOMB);
         SceneObject fairyRing = SceneObjects.closest(obj -> obj.getId() == FAIRY_RING);
         // find tile that is not within 3 tiles of an effect or fairy ring
@@ -145,6 +159,7 @@ public class CroesusLeech extends Plugin {
                     break;
                 }
             }
+
             if (fairyRing != null && fairyRing.getGlobalPosition().distance(tile) <= 3) {
                 valid = false;
             }
@@ -157,7 +172,7 @@ public class CroesusLeech extends Plugin {
     }
 
     private void sipRestore() {
-        Actions.menu(Actions.MENU_EXECUTE_WIDGET, 8, -1, 93716544, 1);
+        Actions.menu(Actions.MENU_EXECUTE_WIDGET, 1, -1, 93716544, 1);
     }
 
     private void reset() {
@@ -165,24 +180,34 @@ public class CroesusLeech extends Plugin {
     }
 
     private void mid() {
-        SceneObject mid = SceneObjects.closest(obj -> obj.getId() == MID);
+        Npc mid = Npcs.closest(obj -> obj.getId() == MID);
         if (mid != null && !Players.self().isAnimationPlaying()) {
-            Actions.menu(Actions.MENU_EXECUTE_OBJECT1, mid.getId(), mid.getGlobalPosition().getX(), mid.getGlobalPosition().getY(), -1);
+            mid.interact("Remove");
         }
     }
 
     private void core() {
-        SceneObject core = SceneObjects.closest(obj -> obj.getId() == FISH_CORE || obj.getId() == MINE_CORE || obj.getId() == HUNT_CORE || obj.getId() == WC_CORE);
-        if (core != null && !Players.self().isAnimationPlaying()) {
-            Actions.menu(Actions.MENU_EXECUTE_OBJECT1, core.getId(), core.getGlobalPosition().getX(), core.getGlobalPosition().getY(), -1);
+        SceneObject ocore = SceneObjects.closest(obj -> obj.getId() == FISH_CORE || obj.getId() == MINE_CORE || obj.getId() == HUNT_CORE || obj.getId() == WC_CORE);
+        Npc ncore = Npcs.closest(obj -> obj.getId() == FISH_CORE || obj.getId() == MINE_CORE || obj.getId() == HUNT_CORE || obj.getId() == WC_CORE);
+
+        if (ocore != null && !Players.self().isAnimationPlaying()) {
+            Actions.menu(Actions.MENU_EXECUTE_OBJECT1, ocore.getId(), ocore.getGlobalPosition().getX(), ocore.getGlobalPosition().getY(), -1);
+        }
+
+        if (ncore != null && !Players.self().isAnimationPlaying()) {
+            ncore.interact(0);
         }
     }
 
     private void unstuck() {
         SceneObject stickyFungus = SceneObjects.closest(obj -> obj.getId() == STICKY_FUNGUS);
         if (stickyFungus != null && !Players.self().isAnimationPlaying()) {
-            Actions.menu(Actions.MENU_EXECUTE_OBJECT1, stickyFungus.getId(), stickyFungus.getGlobalPosition().getX(), stickyFungus.getGlobalPosition().getY(), -1);
+            stickyFungus.interact("Remove");
         }
+    }
+
+    private void unstun() {
+        // @TODO: unlock freedom & find Action to use for hotbar
     }
 
     private Vector3i[] sortTilesByNearest(Vector3i[] tiles) {
@@ -191,16 +216,21 @@ public class CroesusLeech extends Plugin {
 
         for (int i = 0; i < tiles.length; i++) {
             int min = Integer.MAX_VALUE;
-            int index = 0;
+            int minIndex = -1;
             for (int j = 0; j < tiles.length; j++) {
-                int dist = current.distance(tiles[j]);
+                if (tiles[j] == null) {
+                    continue;
+                }
+
+                int dist = tiles[j].distance(current);
                 if (dist < min) {
                     min = dist;
-                    index = j;
+                    minIndex = j;
                 }
             }
-            sorted[i] = tiles[index];
-            tiles[index] = null;
+
+            sorted[i] = tiles[minIndex];
+            tiles[minIndex] = null;
         }
 
         return sorted;
@@ -252,6 +282,9 @@ public class CroesusLeech extends Plugin {
             case UNSTUCK:
                 unstuck();
                 break;
+            case UNSTUN:
+                unstun();
+                break;
             case MID:
                 mid();
                 break;
@@ -266,7 +299,7 @@ public class CroesusLeech extends Plugin {
                 break;
         }
 
-        return i32(600, 6000);
+        return i32(200, 800);
     }
 
     @Override

@@ -5,8 +5,8 @@ import kraken.plugin.api.*;
 import static kraken.plugin.api.Rng.i32;
 
 public class IdleFarmer extends Plugin {
-    private static int[] CULTIVATE_BUSH_IDS = { 122508, 122509, 122510 };
-    private static int HARVEST_BUSH_ID = 122511;
+    private static int[] CULTIVATE_BUSH_IDS = { 122501, 122502, 122503 };
+    private static int HARVEST_BUSH_ID = 122504;
     private static int SCARAB = 28671;
 
     enum State {
@@ -62,7 +62,7 @@ public class IdleFarmer extends Plugin {
         SceneObject bush = SceneObjects.closest(obj -> Array.contains(CULTIVATE_BUSH_IDS, obj.getId()));
 
         if (bush != null) {
-            bush.interact("Cultivate");
+            Actions.menu(Actions.MENU_EXECUTE_OBJECT1, bush.getId(), bush.getGlobalPosition().getX(), bush.getGlobalPosition().getY(), -1);
         }
     }
 
@@ -70,7 +70,7 @@ public class IdleFarmer extends Plugin {
         SceneObject bush = SceneObjects.closest(obj -> obj.getId() == HARVEST_BUSH_ID);
 
         if (bush != null) {
-            bush.interact("Harvest");
+            Actions.menu(Actions.MENU_EXECUTE_OBJECT1, bush.getId(), bush.getGlobalPosition().getX(), bush.getGlobalPosition().getY(), -1);
         }
     }
 

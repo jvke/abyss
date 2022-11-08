@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="PrifThieving:jar">
-    <output-path>$USER_HOME$/Documents/Abyss</output-path>
+    <output-path>$USER_HOME$/Documents/Abyss/Dropbox</output-path>
     <root id="archive" name="PrifThieving.jar">
       <element id="module-output" name="PrifThieving" />
     </root>

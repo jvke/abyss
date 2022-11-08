@@ -5,8 +5,10 @@ import kraken.plugin.api.*;
 import static kraken.plugin.api.Rng.i32;
 
 public class MenaphosFishing extends Plugin {
-    private static int FISHING_SPOT = 24572;
-    private static int BANK = 107489;
+    private int FISHING_SPOT = 24572;
+    private int BANK = 107489;
+
+    private boolean menaphos = true;
 
     enum State {
         FISH,
@@ -42,7 +44,7 @@ public class MenaphosFishing extends Plugin {
         Npc spot = Npcs.closest(n -> n.getId() == FISHING_SPOT);
 
         if (spot != null && !s.isAnimationPlaying() && !s.isMoving() && !Inventory.isFull()) {
-            spot.interact("Bait");
+            spot.interact(menaphos ? "Bait" : "Catch");
         }
     }
 
@@ -55,7 +57,17 @@ public class MenaphosFishing extends Plugin {
 
         if (b != null) {
 //            b.interact("Deposit all fish");
-            Actions.menu(Actions.MENU_EXECUTE_OBJECT2, 107489, 3217, 2623, -1426063359);
+            if (menaphos) {
+                Actions.menu(Actions.MENU_EXECUTE_OBJECT4, 107489, 3217, 2623, -1426063359);
+            } else {
+                if (Bank.isOpen()) {
+                    Actions.menu(Actions.MENU_EXECUTE_WIDGET, 1, 1, 33882231, -1);
+                } else {
+                    if (!Players.self().isMoving()) {
+                        b.interact("Use");
+                    }
+                }
+            }
         }
     }
 
@@ -95,5 +107,10 @@ public class MenaphosFishing extends Plugin {
     @Override
     public void onPaint() {
         ImGui.label("Fish!");
+
+        menaphos = ImGui.checkbox("Menaphos", menaphos);
+        BANK = ImGui.intInput("Bank ID", BANK);
+//        FISHING_SPOT = ImGui.intInput("Fishing Spot ID", FISHING_SPOT);
+        FISHING_SPOT = menaphos ? 24572 : 25219;
     }
 }

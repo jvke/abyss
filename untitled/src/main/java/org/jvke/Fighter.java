@@ -2,21 +2,24 @@ package org.jvke;
 
 import kraken.plugin.api.*;
 
+import java.util.Arrays;
+
 import static kraken.plugin.api.Rng.i32;
 
 public class Fighter extends Plugin {
-    private int NPC = 0;
+    private String NPC = null;
 
     enum State {
         FIGHT,
-        ADOPT,
+        LOOT,
         IDLE
     }
 
     private boolean shouldFight() {
         Player self = Players.self();
+        self.getInteractingIndex()
 
-        return !(self.isMoving() || self.isUnderAttack() || self.isAnimationPlaying());
+        return !(self.isMoving());
     }
 
     State getState() {
@@ -28,7 +31,14 @@ public class Fighter extends Plugin {
     }
 
     private void fight() {
-        Npc npc = Npcs.closest(n -> n.getId() == NPC);
+        Npc npc = Npcs.closest(
+            n ->
+                n.getName()
+                    .toLowerCase()
+                    .contains(NPC.toLowerCase())
+                && Arrays.stream(n.getOptionNames())
+                    .anyMatch(s -> s.contains("Attack"))
+        );
 
         if (npc != null) {
             npc.interact("Attack");
@@ -68,8 +78,8 @@ public class Fighter extends Plugin {
 
     @Override
     public void onPaint() {
-        ImGui.label("Fighting!");
+        ImGui.label("AutoFighter");
 
-        NPC = ImGui.intInput("NPC ID:", NPC);
+        ImGui.input("Name of NPC:", NPC.getBytes());
     }
 }

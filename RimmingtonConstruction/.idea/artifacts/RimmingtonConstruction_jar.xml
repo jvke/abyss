@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="RimmingtonConstruction:jar">
-    <output-path>$USER_HOME$/Documents/Kraken</output-path>
+    <output-path>$USER_HOME$/Documents/Abyss/Dropbox</output-path>
     <root id="archive" name="RimmingtonConstruction.jar">
       <element id="module-output" name="RimmingtonConstruction" />
     </root>
